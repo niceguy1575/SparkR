@@ -8,11 +8,23 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## 목차
 
-## Basic Setup : SparkR, library, Data Reading
+1. Basic Setup
+    1-1. Computing Setup
+    1-2. 사용한 변수 설명
+2. Analysis  of Airline Dealy
+    2-1. 기초 통계량 파악
+    2-2. 공항별 평균 지연시간의 분포
+    2-3. 여러 공항의 연도별 평균 지연시간 비교
+    2-4. 국제 공항의 15분 이상 delay된 비율
+3. 결론 및 향후과제
+
+
+<h3> 1-1. Computing Setup </h3>
 
 R MarkDown으로 실행시 chunk가 전부 실행되는 단점이 존재한다.
-따라서 많은 시간이 걸리기 때문에, saveDf.r을 먼저 실행 시킨 후, 결과를 따로 저장한다.
+따라서 많은 시간이 걸리기 때문에, MakeSaveFiles.r을 먼저 실행 시킨 후, 결과를 따로 저장한다.
 R MarkDown에서 결과를 활용하여 요약 및 시각화하는 목적이 있다.
 
 ```{r, echo=FALSE, include=FALSE, warning = FALSE}
@@ -44,97 +56,145 @@ R MarkDown에서 결과를 활용하여 요약 및 시각화하는 목적이 있
     airports <- as.data.frame(airports)
 ```
 
-## Analysis  of Airline Dealy
+<h3> 1-2. 사용한 변수 설명 </h3>
+
+1	Year	1987-2008
+2	ArrDelay	arrival delay, in minutes
+3	DepDelay	departure delay, in minutes
+4	Origin	origin IATA airport code
+5	Dest	destination IATA airport code
+
+## 2. Analysis  of Airline Dealy
 공항을 이용하는 사람들은 지연시간에 대해 민감하다.
 물론 지연시간 몇분이 공항을 선택하는 주요 요소가 되지는 않는다.
 하지만, 공항을 이용하는 고객들에게 지연시간은 신경써야하는 요소임에 틀림없다.
 따라서 1987.10 ~ 2008.12 미국 항공 데이터를 이용하여 지연시간에 대해 탐구했다.
 
-## 기초 통계량
+<h3> 2-1. 기초 통계량 </h3>
 지연시간 탐구에 앞서 데이터를 이해하는 과정이 필요하다.
 따라서 관련된 기초 통계량을 확인하였다.
 
 <h4> 총 운행횟수 </h4>
+활용한 변수 : -
+총 운행횟수는 모든 행의 갯수를 참조하였습니다.
+
 ```{r, warning = FALSE}
   total_flight = "123534969"
   print( paste(total_flight, "회 운행") )
 ```
 
 <h4> 항공기 운행에 이용된 공항의 총 갯수 </h4>
+활용한 변수 : Year, Origin
+
 ```{r, warning = FALSE}
     originDf = `OriginDf.csv`
     print( paste(length(unique(originDf$Origin)), "대의 공항이 이용됨.") )
 ```
 
 <h4> 출발 및 도착의 지연시간 </h4>
+활용한 변수 : Year, Origin, Dest
+
 ```{r, warning = FALSE}
   delay_df = `delay_df.csv`
   print( paste("도착 지연시간 :", round(sum(delay_df$ArrDelaySum,na.rm = T)/sum(delay_df$CNT,na.rm = T),2) , "분" ) )
   print( paste("출발 지연시간 :", round(sum(delay_df$DepDealySum,na.rm = T)/sum(delay_df$CNT,na.rm = T),2 ), "분" ) )
-  head(delay_df, n = 15)
 ```
 
-## 공항의 연도별 지연시간의 변화
+<h3> 2-2. 공항별 평균 지연시간 탐색 </h3>
 공항을 기준으로 지연시간에 대한 탐색을 했다.
 공항기준 지연시간이란 다음과 같다.
 해당 공항의 총 Delay는 출발지가 해당 공항일때의 DepDelay와 도착지가 해당 공항일때의 ArrDelay를 함께 고려한다.
  
 <h4> 연간 Arrival & Departure 평균 지연시간 및 운행횟수 </h4>
+공항별 평균 지연시간과 운행횟수를 얻었다.
+활용한 변수 : Year, Origin, Dest, depDelay, arrDelay
 
-공항별 평균 지연시간과 운행횟수를 얻었습니다.
-```{r, warning = FALSE}
+```{r, include = FALSE, warning = FALSE}
   airports_df = `airports_df.csv`
   airportsDelay = `airportsDelay.csv`
-  head(airportsDelay, n = 10)
+  delaySummary = `delaySummary.csv`
 ```
 
-<h4> 공항별 delayMean과 depMean의 boxplot </h4>
-```{r, warning = FALSE}
-    delaySummary = `delaySummary.csv`
+<h4> 공항별 arrival delayMean과 departure delayMean의 boxplot </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE, warning = FALSE}
     boxplot(delaySummary$depMean, delaySummary$arrMean, horizontal = TRUE,
             main = "departure mean and arrival mean of airports", names = c("departure", "arrival") )
 ```
 <h4> 공항별 delayMean과 depMean의 boxplot </h4>
-
 boxplot을 확인한 결과 dealy평균이 20분 이상인 데이터는 상식에 맞지 않는 데이터라고 생각했다.
 따라서 Delay가 20분 이상인 공항에 대해서 확인하고, 이를 제외하여 boxplot을 다시 그렸다.
 
-<h4> find outlier </h4>
-```{r, include = FALSE, warning = FALSE}
+
+<h4> outlier 확인 </h4>
+20분 이상인 공항을 outlier로 생각한다.
+
+평균 20분 이상의 공항 목록은 아래와 같다.
+```{r, warning = FALSE}
     depOver = delaySummary[delaySummary$depMean >= 20,c('airports','depMean')]
     arrOver = delaySummary[delaySummary$arrMean >= 20,c('airports','arrMean')]
     over20 = unique(c( depOver$airports, arrOver$airports ))
-    print( paste("평균 20분 이상의 공항 : ", over20 ) )
+    print(over20)
 ```
 
-<h4> delay가 20분이 넘는 delayMean과 depMean의 boxplot </h4>
-```{r, warning=FALSE}
+평균 0분 이하의 공항 목록은 아래와 같다.
+```{r, warning = FALSE}
+    depEarly = delaySummary[delaySummary$depMean < 0,c('airports','depMean')]
+    arrEarly = delaySummary[delaySummary$arrMean < 0,c('airports','arrMean')]
+    ear0 = unique(c( depEarly$airports, arrEarly$airports ))
+    print(ear0)
+```
+
+<h4> delay가 20분이 넘는 데이터를 제외한 arrival delayMean과 departure delayMean의 boxplot </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE, warning = FALSE}
     boxplot(delaySummary[!delaySummary$airports %in% over20,]$depMean,
             delaySummary[!delaySummary$airports %in% over20,]$arrMean, horizontal = TRUE,
             main = "departure mean and arrival mean of airports", names = c("departure", "arrival") )
 ```
 
-## xyplot
+6-7분 정도의 중위수를 가지며, 약 1, 13분 에 whisker를 가지고 있다.
+총 347개의 공항 중, 29개의 outlier를 가진다.
+29개 중 10개는 0분 이하의 delay를 가지며, 나머지 19개는 13분의 delay를 갖는다.
+
+## xyplot : 2-3. 공항의 연도별 평균 지연시간 비교
 
 미국의 거점 공항과 탐색한 outlier에 대한 공항별 연도 / Delay의 그래프를 나타내었다.
+
 미국의 거점 공항의 출처는 다음과 같다.(https://ko.wikipedia.org/wiki/%EA%B5%AD%EC%A0%9C%EA%B3%B5%ED%95%AD)
+
 outlier중 공항 운행횟수가 극히 적은(under 100) 공항은 평균치에 그 의미가 적으므로 제외한다.
+
+활용한 변수 : Year, Origin, Dest, depDelay, arrDelay
 
 <h4> 도착지연시간의 xyplot </h4>
 
-```{r, warning = FALSE}
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE, warning = FALSE}
   over20Genuine = unique(airportsDelay[airportsDelay$airports %in% over20 & airportsDelay$CNT > 100,]$airports)
-  targetAirports <- c( c("JFK", "LAX", "ATL", "BOS", "DFW", "DTW", "EWR", "IAD", "IAH", "LAS",
-                         "LGA", "MSP", "ORD", "SEA" , "SAN", "HNL"), over20Genuine)
-  res_df = airportsDelay[airportsDelay$airports %in% targetAirports,]
-
-  # 도착지연시간
-  suppressWarnings(xyplot(res_df$ArrDelayMean ~ res_df$Year | res_df$airports, group=res_df$airports, grid=TRUE,
-                        layout=c(4,5), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
+  ear0Genuine = unique(airportsDelay[airportsDelay$airports %in% ear0 & airportsDelay$CNT > 100,]$airports)
+  targetAirports1 <- c("JFK", "LAX", "ATL", "BOS", "DFW", "DTW", "EWR", "IAD", "IAH", "LAS",
+                         "LGA", "MSP", "ORD", "SEA" , "SAN", "HNL")
+  targetAirports2 <- c(over20Genuine, ear0Genuine)
+  res_df1 = airportsDelay[airportsDelay$airports %in% targetAirports1,]
+  res_df2 = airportsDelay[airportsDelay$airports %in% targetAirports2,]
+  res_df2 = res_df2[res_df2$CNT > 100,]
+  
+  # 도착지연시간 : 국제공항
+  suppressWarnings(xyplot(res_df1$ArrDelayMean ~ res_df1$Year | res_df1$airports, group=res_df1$airports, grid=TRUE,
+                        layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
                         xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
-  # 출발지연시간
-  suppressWarnings(xyplot(res_df$DepDelayMean ~ res_df$Year | res_df$airports, group=res_df$airports, grid=TRUE,
-                        type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
+
+  # 도착지연시간 : over20 / early 0
+  suppressWarnings(xyplot(res_df2$ArrDelayMean ~ res_df2$Year | res_df2$airports, group=res_df2$airports, grid=TRUE,
+                        layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
+                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
+
+  # 출발지연시간 : 국제공항
+  suppressWarnings(xyplot(res_df1$DepDelayMean ~ res_df1$Year | res_df1$airports, group=res_df1$airports, grid=TRUE,
+                        layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
+                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
+                        
+  # 출발지연시간 : over20 / early 0
+  suppressWarnings(xyplot(res_df2$ArrDelayMean ~ res_df2$Year | res_df2$airports, group=res_df2$airports, grid=TRUE,
+                        layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
                         xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
 ```
 
@@ -149,9 +209,10 @@ ACK 공항에서는 JFK, EWR 등의 적은 노선만이 확인된다.
     head(ACKdf, n = 15)
 ```
 
-## 국제 공항의 15분 이상 delay된 비율
+## 2-4. 국제 공항의 15분 이상 delay된 비율
 국제 공항의 15분 이상 delay된 비율을 지도에 표시하였다.
 대표적인 국제공항은 총 16개로 나타나지만, 뉴욕의 EWR, JFK 그리고 워싱턴의 IAD의 2008년의 자료를 활용하였다.
+활용한 변수 : Year, Origin, Dest, depDelay, arrDelay
 
 ```{r, include = FALSE, warning = FALSE}
   # Data Processing : summary function  
@@ -274,15 +335,14 @@ ACK 공항에서는 JFK, EWR 등의 적은 노선만이 확인된다.
   }
 ```
 
-<h5> EWR 공항의 depDelay </h5>
-
-```{r, warnings=FALSE}
+<h4> EWR 공항의 depDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
   EWR_map1 = getMap("EWR", 2008, arrDelay = FALSE)
   print(EWR_map1$map)
 ```
 
-<h5> EWR 공항의 arrDelay </h5>
-```{r, warnings=FALSE}
+<h4> EWR 공항의 arrDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
   EWR_map2 = getMap("EWR", 2008, arrDelay = TRUE)
   print(EWR_map2$map)
 ```
@@ -293,13 +353,13 @@ EWR에서는 depDelay는 arrDelay보다 적은 양상을 띈다.
 
 
 
-<h5> JFK 공항의 depDelay </h5>
-```{r, warnings=FALSE}
+<h4> JFK 공항의 depDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
   JFK_map1 = getMap("JFK", 2008, arrDelay = FALSE)
   print(JFK_map1$map)
 ```
 
-<h5> JFK 공항의 arrDelay </h5>
+<h4> JFK 공항의 arrDelay </h4>
 ```{r, warnings=FALSE}
   JFK_map2 = getMap("JFK", 2008, arrDelay = TRUE)
   print(JFK_map2$map)
@@ -311,15 +371,14 @@ JFK역시 NewYork발 depDelay는 arrDelay보다 적은 양상을 띈다.
 
 
 
-
-<h5> IAD 공항의 depDelay </h5>
-```{r, warnings=FALSE}
+<h4> IAD 공항의 depDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
   IAD_map1 = getMap("IAD", 2008, arrDelay = FALSE)
   print(IAD_map1$map)
 ```
 
-<h5> IAD 공항의 arrDelay </h5>
-```{r, warnings=FALSE}
+<h4> IAD 공항의 arrDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
   IAD_map2 = getMap("IAD", 2008, arrDelay = TRUE)
   print(IAD_map2$map)
 ```
@@ -332,5 +391,17 @@ JFK역시 NewYork발 depDelay는 arrDelay보다 적은 양상을 띈다.
 ```{r, warnings=FALSE}
   time = c(EWR_map1$timesTaken, EWR_map2$timesTaken, JFK_map1$timesTaken,
            JFK_map2$timesTaken, IAD_map1$timesTaken, IAD_map2$timesTaken)
-  print( paste('EWR ~ IAD 각각의 소요시간', round(time,3), "초") )
+  # 각 지도별 소요시간
+  print( round(time,3) )
 ```
+
+## 3. 결론 및 향후과제
+  
+<h3> 결론 </h3>
+  공항별로 지연시간은 상이하며, 공항의 위치에 따라 그 양상이 다양한 모습을 알 수 있었다.
+  공항은 사람을 운송하는 서비스이다.
+  위와같이 delay를 연구하는것은 운송 서비스에서의 delay를 이해하는데에 도움이 될 수 있을것이다.
+
+<h3> 향후과제 </h3>  
+  delay에 영향을 미치는 요소는 많다.
+  본 데이터에서 많이 누락된 기상데이터등의 외부 자료들이 결합된다면, delay의 본질 파악이 더 쉬워질 것이다.
