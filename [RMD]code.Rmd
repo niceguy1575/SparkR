@@ -80,12 +80,16 @@ R MarkDown에서 결과를 활용하여 요약 및 시각화하는 목적이 있
 
 ## 2. Analysis  of Airline Delay
 공항을 이용하는 사람들은 지연시간에 대해 민감하다.
+<br>
 물론 지연시간 몇분이 공항을 선택하는 주요 요소가 되지는 않는다.
+<br>
 하지만, 공항을 이용하는 고객들에게 지연시간은 신경써야하는 요소임에 틀림없다.
+<br>
 따라서 1987.10 ~ 2008.12 미국 항공 데이터를 이용하여 지연시간에 대해 탐구했다.
 
 <h3> 2-1. 기초 통계량 </h3>
 지연시간 탐구에 앞서 데이터를 이해하는 과정이 필요하다.
+<br>
 따라서 관련된 기초 통계량을 확인하였다.
 
 <h4> 총 운행횟수 </h4>
@@ -116,7 +120,9 @@ R MarkDown에서 결과를 활용하여 요약 및 시각화하는 목적이 있
 
 <h3> 2-2. 공항별 평균 지연시간 탐색 </h3>
 공항을 기준으로 지연시간에 대한 탐색을 했다.
+<br>
 공항기준 지연시간이란 다음과 같다.
+<br>
 해당 공항의 총 Delay는 출발지가 해당 공항일때의 DepDelay와 도착지가 해당 공항일때의 ArrDelay를 함께 고려한다.
  
 <h4> 연간 Arrival & Departure 평균 지연시간 및 운행횟수 </h4>
@@ -166,17 +172,19 @@ boxplot을 확인한 결과 dealy평균이 20분 이상인 데이터는 상식�
 ```
 
 6-7분 정도의 중위수를 가지며, 약 1, 13분 에 whisker를 가지고 있다.
+<br>
 총 347개의 공항 중, 29개의 outlier를 가진다.
-29개 중 10개는 0분 이하의 delay를 가지며, 나머지 19개는 13분의 delay를 갖는다.
+<br>
+29개 중 10개는 0분 이하의 delay를 가지며, 나머지 19개는 13분 이상의 delay를 갖는다.
 
 ## xyplot : 2-3. 공항의 연도별 평균 지연시간 비교
 
-미국의 거점 공항과 탐색한 outlier에 대한 공항별 연도 / Delay의 그래프를 나타내었다.
-
+미국의 거점 공항과 탐색한 outlier에 대한 공항별 연도별 Delay의 그래프를 나타내었다.
+<br>
 미국의 거점 공항의 출처는 다음과 같다.(https://ko.wikipedia.org/wiki/%EA%B5%AD%EC%A0%9C%EA%B3%B5%ED%95%AD)
-
+<br>
 outlier중 공항 운행횟수가 극히 적은(under 100) 공항은 평균치에 그 의미가 적으므로 제외한다.
-
+<br>
 활용한 변수 : Year, Origin, Dest, depDelay, arrDelay
 
 <h4> 도착지연시간의 xyplot </h4>
@@ -194,25 +202,26 @@ outlier중 공항 운행횟수가 극히 적은(under 100) 공항은 평균치�
   # 도착지연시간 : 국제공항
   suppressWarnings(xyplot(res_df1$ArrDelayMean ~ res_df1$Year | res_df1$airports, group=res_df1$airports, grid=TRUE,
                         layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
-                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
+                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year of IATA"))
 
   # 도착지연시간 : over20 / early 0
   suppressWarnings(xyplot(res_df2$ArrDelayMean ~ res_df2$Year | res_df2$airports, group=res_df2$airports, grid=TRUE,
                         layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
-                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
+                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year of outliers"))
 
   # 출발지연시간 : 국제공항
   suppressWarnings(xyplot(res_df1$DepDelayMean ~ res_df1$Year | res_df1$airports, group=res_df1$airports, grid=TRUE,
                         layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
-                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
+                        xlab="year", ylab="mean of arrDelay", main = "departure delay by year of IATA"))
                         
   # 출발지연시간 : over20 / early 0
   suppressWarnings(xyplot(res_df2$ArrDelayMean ~ res_df2$Year | res_df2$airports, group=res_df2$airports, grid=TRUE,
                         layout=c(4,4), type = c("p", "smooth"), lwd = 4, lattice.options = list(panel.error = "warning"),
-                        xlab="year", ylab="mean of arrDelay", main = "arrival delay by year"))
+                        xlab="year", ylab="mean of arrDelay", main = "departure delay by year of outliers"))
 ```
 
 평균이 20분이 넘는 OTH, HHH, SOP, ACK 공항에서는 Delay Mean이 높은 모습을 확인할 수 있다.
+<br>
 각각의 공항에서는 운항횟수의 문제와 더불어 운항 노선도 적은 모습을 알 수 있었다.
 
 <h5> Example : ACK 공항 </h5>
@@ -225,7 +234,9 @@ ACK 공항에서는 JFK, EWR 등의 적은 노선만이 확인된다.
 
 ## 2-4. 국제 공항의 15분 이상 delay된 비율
 국제 공항의 15분 이상 delay된 비율을 지도에 표시하였다.
-대표적인 국제공항은 총 16개로 나타나지만, 뉴욕의 EWR, JFK 그리고 워싱턴의 IAD의 2008년의 자료를 활용하였다.
+<br>
+대표적인 국제공항은 총 16개로 나타나지만, 하와이의 HNL, 뉴욕의 EWR, JFK 그리고 워싱턴의 IAD의 2008년의 자료를 활용하였다.
+<br>
 활용한 변수 : Year, Origin, Dest, depDelay, arrDelay
 
 ```{r, include = FALSE, warning = FALSE}
@@ -307,6 +318,8 @@ ACK 공항에서는 JFK, EWR 등의 적은 노선만이 확인된다.
     # origin long and lat
     origin_long = air_res_df$Origin_long[1]
     origin_lat = air_res_df$Origin_lat[1]
+    origin_long = ifelse(ifelse(origin_long < -130, -130, origin_long) > -65, -65, ifelse(origin_long < -130, -130, origin_long))
+	origin_lat = ifelse(ifelse(origin_lat < 23, 23, origin_lat) > 52, 52, ifelse(origin_lat < 23, 23, origin_lat))
 
     # Origin Point
     g <- g + geom_point(aes(x=origin_long, y =origin_lat), color = 'brown', size = 3)
@@ -362,7 +375,9 @@ ACK 공항에서는 JFK, EWR 등의 적은 노선만이 확인된다.
 ```
 
 2008년의 EWR는 위와 같은 양상이다.
+<br>
 EWR에서는 depDelay는 arrDelay보다 적은 양상을 띈다.
+<br>
 게다가 대부분의 지역에서 높은 delay가 발생한 모습을 확인할 수 있다.
 
 
@@ -380,7 +395,9 @@ EWR에서는 depDelay는 arrDelay보다 적은 양상을 띈다.
 ```
 
 2008년의 JFK는 위와 같은 양상이다.
+<br>
 JFK역시 NewYork발 depDelay는 arrDelay보다 적은 양상을 띈다.
+<br>
 하지만 arrDelay는 그 양상이 EWR보다는 delay가 적은 모습을 보인다.
 
 
@@ -397,25 +414,43 @@ JFK역시 NewYork발 depDelay는 arrDelay보다 적은 양상을 띈다.
   print(IAD_map2$map)
 ```
 
-뉴욕과달리 IAD는 departure delay에서 지연시간이 길다.
+뉴욕과달리 IAD는 departure delay에서 15분 이상의 지연시간 비율이 길다.
+<br>
 반면 arrival delay에서는 그 양상이 덜하다.
 
+<h4> HNL 공항의 depDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
+  HNL_map1 = getMap("HNL", 2008, arrDelay = FALSE)
+  print(HNL_map1$map)
+```
+
+<h4> HNL 공항의 arrDelay </h4>
+```{r,echo=F,fig.align='center',out.extra='angle=90', echo=FALSE}
+  HNL_map2 = getMap("HNL", 2008, arrDelay = TRUE)
+  print(HNL_map2$map)
+```
+HNL의 경우는 노선과 delay가 원활한 모습을 확인할 수 있다.
+<br>
 
 ## 지도당 소요시간
 ```{r, warnings=FALSE}
   time = c(EWR_map1$timesTaken, EWR_map2$timesTaken, JFK_map1$timesTaken,
-           JFK_map2$timesTaken, IAD_map1$timesTaken, IAD_map2$timesTaken)
-  # 각 지도별 소요시간
-  print( round(time,3) )
+           JFK_map2$timesTaken, IAD_map1$timesTaken, IAD_map2$timesTaken,
+		   HNL_map1$timesTaken, HNL_map2$timesTaken)
+  # 지도별 평균 소요시간
+  print( round(mean(time),3) )
 ```
 
 ## 3. 결론 및 향후과제
   
 <h3> 결론 </h3>
   공항별로 지연시간은 상이하며, 공항의 위치에 따라 그 양상이 다양한 모습을 알 수 있었다.
+  <br>
   공항은 사람을 운송하는 서비스이다.
+  <br>
   위와같이 delay를 연구하는것은 운송 서비스에서의 delay를 이해하는데에 도움이 될 수 있을것이다.
 
 <h3> 향후과제 </h3>  
   delay에 영향을 미치는 요소는 많다.
+  <br>
   본 데이터에서 많이 누락된 기상데이터등의 외부 자료들이 결합된다면, delay의 본질 파악이 더 쉬워질 것이다.
