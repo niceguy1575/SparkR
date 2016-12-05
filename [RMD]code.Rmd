@@ -11,15 +11,24 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 목차
 
 1. Basic Setup
+<br>
     1-1. Computing Setup
+<br>    
     1-2. 사용한 변수 설명
+<br>
+<br>
 2. Analysis  of Airline Dealy
+<br>
     2-1. 기초 통계량 파악
+<br>
     2-2. 공항별 평균 지연시간의 분포
+<br>
     2-3. 여러 공항의 연도별 평균 지연시간 비교
+<br>
     2-4. 국제 공항의 15분 이상 delay된 비율
+<br>
 3. 결론 및 향후과제
-
+<br>
 
 <h3> 1-1. Computing Setup </h3>
 
@@ -58,13 +67,18 @@ R MarkDown에서 결과를 활용하여 요약 및 시각화하는 목적이 있
 
 <h3> 1-2. 사용한 변수 설명 </h3>
 
+<br>
 1	Year	1987-2008
+<br>
 2	ArrDelay	arrival delay, in minutes
+<br>
 3	DepDelay	departure delay, in minutes
+<br>
 4	Origin	origin IATA airport code
+<br>
 5	Dest	destination IATA airport code
 
-## 2. Analysis  of Airline Dealy
+## 2. Analysis  of Airline Delay
 공항을 이용하는 사람들은 지연시간에 대해 민감하다.
 물론 지연시간 몇분이 공항을 선택하는 주요 요소가 되지는 않는다.
 하지만, 공항을 이용하는 고객들에게 지연시간은 신경써야하는 요소임에 틀림없다.
